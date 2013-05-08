@@ -1,0 +1,27 @@
+insert into candidates (image_name,telemetryid,processed) values ('g_square.png',1,false);
+insert into candidates (image_name,telemetryid,processed) values ('j_square4.png',1,false);
+insert into candidates (image_name,telemetryid,processed) values ('n_square2.png',1,false);
+insert into candidates (image_name,telemetryid,processed) values ('o_diamond3.png',1,false);
+insert into candidates (image_name,telemetryid,processed) values ('r_square2.png',1,false);
+insert into candidates (image_name,telemetryid,processed) values ('s_square.png',1,false);
+insert into candidates (image_name,telemetryid,processed) values ('t_rectangle3.png',1,false);
+
+insert into description (shape,shapecolor,letter,lettercolor, timestamp) values('circle','green','A','yellow','timestamp')
+//delete from candidates where candidateid = 1
+//candidates 2 to 9
+//descriptions 1 to 8
+
+
+insert into unverified_targets (candidateid,revision,location,description_id,processed) values (2,2,1,2,false);
+insert into unverified_targets (candidateid,revision,location,description_id,processed) values (3,2,1,3,false);
+insert into unverified_targets (candidateid,revision,location,description_id,processed) values (4,2,1,4,false);
+insert into unverified_targets (candidateid,revision,location,description_id,processed) values (5,2,1,5,false);
+insert into unverified_targets (candidateid,revision,location,description_id,processed) values (6,2,1,6,false);
+insert into unverified_targets (candidateid,revision,location,description_id,processed) values (7,2,1,7,false);
+insert into unverified_targets (candidateid,revision,location,description_id,processed) values (8,2,1,8,false);
+
+
+
+
+select candidateid,targetid,description.description_id,shape,shapecolor,letter,lettercolor,target_x,target_y,top_x,top_y,timestamp,image_name
+from description inner join (select targetid,candidates.candidateid,description_id,image_name from unverified_targets inner join candidates on candidates.candidateid = unverified_targets.candidateid) as c on c.description_id = description.description_id

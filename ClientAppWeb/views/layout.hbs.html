@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Client App</title>
+	<meta charset="UTF-8">
+	<!--WE NEED TO DOWNLOAD THIS, SINCE WE WONT HAVE INTERNETZ-->
+	<!--<script src="http://yui.yahooapis.com/3.4.1/build/yui/yui-min.js"></script>-->
+	<script src="/javascripts/yui/build/yui/yui-min.js"></script>
+	
+	{{#if readonly}}
+		<script src="/javascripts/clientapp/clientapp-images-viewer.js"></script>
+		<script src="/javascripts/clientapp/clientapp-imageview-viewer.js"></script>
+	{{else}}
+		<script src="/javascripts/clientapp/clientapp-images.js"></script>
+		<script src="/javascripts/clientapp/clientapp-sidebar.js"></script>
+		<script src="/javascripts/clientapp/clientapp-imageview.js"></script>
+	{{/if}}
+	
+	<script src="/socket.io/socket.io.js"></script>
+	<script src="/javascripts/clientapp/poller.js"></script>
+
+	<link rel="stylesheet" href="/stylesheets/style.css" />
+</head>
+<body>
+	<div class="entry">
+	  <div class="body">
+	    {{{body}}}
+	  </div>
+	</div>
+</body>

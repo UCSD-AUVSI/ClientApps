@@ -1,0 +1,196 @@
+
+-- Table: description
+
+DROP TABLE verified_targets;
+DROP TABLE unverified_targets;
+DROP INDEX planelocation_id;
+DROP TABLE candidates;
+DROP TABLE telemetry;
+DROP TABLE location;
+DROP TABLE gps_position;
+DROP TABLE description;
+
+CREATE TABLE description
+(
+  description_id SERIAL NOT NULL,
+  shape character varying(50),
+  shapecolor character varying(50),
+  letter character varying(50),
+  lettercolor character varying(50),
+  target_x integer,
+  target_y integer,
+  top_x integer,
+  top_y integer,
+  heading character varying(50),
+  timestamp double precision,
+  CONSTRAINT description_id PRIMARY KEY (description_id )
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE description
+  OWNER TO postgres;
+
+-- Table: gps_position
+
+-- DROP TABLE gps_position;
+
+CREATE TABLE gps_position
+(
+  gps_id SERIAL NOT NULL,
+  lat double precision,
+  lon double precision,
+  alt double precision,
+  CONSTRAINT gps_id PRIMARY KEY (gps_id )
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE gps_position
+  OWNER TO postgres;
+
+-- Table: location
+
+-- DROP TABLE location;
+
+CREATE TABLE location
+(
+  loc_id SERIAL NOT NULL,
+  lower_left_gps integer,
+  lower_right_gps integer,
+  upper_left_gps integer,
+  upper_right_gps integer,
+  CONSTRAINT loc_id PRIMARY KEY (loc_id ),
+  CONSTRAINT loc_gps_ll FOREIGN KEY (lower_left_gps)
+      REFERENCES gps_position (gps_id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION,
+  CONSTRAINT loc_gps_lr FOREIGN KEY (lower_right_gps)
+      REFERENCES gps_position (gps_id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION,
+  CONSTRAINT loc_gps_ul FOREIGN KEY (upper_left_gps)
+      REFERENCES gps_position (gps_id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION,
+  CONSTRAINT loc_gps_ur FOREIGN KEY (upper_right_gps)
+      REFERENCES gps_position (gps_id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE location
+  OWNER TO postgres;
+
+-- Table: telemetry
+
+-- DROP TABLE telemetry;
+
+CREATE TABLE telemetry
+(
+  telemetry_id SERIAL NOT NULL,
+  gimbal_roll double precision,
+  gimbal_pitch double precision,
+  gimbal_yaw double precision,
+  origin_x integer,
+  origin_y integer,
+  gimbal_zoom integer,
+  plane_roll double precision,
+  plane_pitch double precision,
+  plane_heading double precision,
+  planelocation_id integer,
+  CONSTRAINT telemetry_id PRIMARY KEY (telemetry_id ),
+  CONSTRAINT planelocation_id FOREIGN KEY (planelocation_id)
+      REFERENCES gps_position (gps_id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE telemetry
+  OWNER TO postgres;
+
+-- Table: candidates
+
+-- DROP TABLE candidates;
+
+CREATE TABLE candidates
+(
+  candidateid SERIAL NOT NULL,
+  image_name character varying(200) NOT NULL,
+  telemetryid integer NOT NULL,
+  processed boolean,
+  CONSTRAINT candidateid PRIMARY KEY (candidateid ),
+  CONSTRAINT cand_telem FOREIGN KEY (telemetryid)
+      REFERENCES telemetry (telemetry_id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE candidates
+  OWNER TO postgres;
+
+
+-- Index: planelocation_id
+
+-- DROP INDEX planelocation_id;
+
+CREATE INDEX planelocation_id
+  ON telemetry
+  USING btree
+  (planelocation_id );
+
+-- Table: unverified_targets
+
+-- DROP TABLE unverified_targets;
+
+CREATE TABLE unverified_targets
+(
+  targetid SERIAL NOT NULL,
+  candidateid integer NOT NULL,
+  revision integer NOT NULL,
+  location integer,
+  description_id integer,
+  processed boolean,
+  CONSTRAINT id PRIMARY KEY (targetid ),
+  CONSTRAINT unverif_cand FOREIGN KEY (candidateid)
+      REFERENCES candidates (candidateid) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION,
+  CONSTRAINT unverif_desc FOREIGN KEY (description_id)
+      REFERENCES description (description_id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION,
+  CONSTRAINT unverif_loc FOREIGN KEY (location)
+      REFERENCES location (loc_id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE unverified_targets
+  OWNER TO postgres;
+
+-- Table: verified_targets
+
+-- DROP TABLE verified_targets;
+
+CREATE TABLE verified_targets
+(
+  targetid integer NOT NULL,
+  submitid SERIAL NOT NULL,
+  descriptionid integer NOT NULL,
+  center_gps_id integer NOT NULL,
+  CONSTRAINT verified_id PRIMARY KEY (submitid ),
+  CONSTRAINT verif_desc FOREIGN KEY (descriptionid)
+      REFERENCES description (description_id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION,
+  CONSTRAINT verif_gps FOREIGN KEY (center_gps_id)
+      REFERENCES gps_position (gps_id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION,
+  CONSTRAINT verif_unverif FOREIGN KEY (targetid)
+      REFERENCES unverified_targets (targetid) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE verified_targets
+  OWNER TO postgres;

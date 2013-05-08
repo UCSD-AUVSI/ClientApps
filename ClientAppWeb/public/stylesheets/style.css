@@ -1,0 +1,76 @@
+* {
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+  background-color: #222222;
+}
+
+
+a {
+  color: #00B7FF;
+}
+
+#index {
+	position: relative;
+}
+
+#left-col {
+	margin-right: 290px;
+	background-color: #000000;
+}
+#left-col-ro {
+	width: 100%;
+	background-color: #000000;
+}
+#sidebar {
+	float: right;
+	width: 278px;
+	background-color: #222222;
+	color: #eeeeee;
+	padding: 5px;
+	border-left: 2px solid #222222;
+}
+
+h3 {
+	margin: 2px;
+}
+
+#sidebar #guess-text-content .guess-input {
+	width: 60%;
+	height: 30px;
+	font-size: 19px;
+	padding: 0px 5px;
+}
+
+#sidebar #guess-text-content label {
+	
+}
+
+#sidebar input[type="button"] {
+	background-color: #AAAAAA;
+	border: 1px solid black;
+	height: 30px;
+	width: 100px;
+}
+
+#sidebar input[type="button"]:hover {
+	background-color: #FFFFFF;
+}
+
+#sidebar #btn-content {
+	margin-top: 20px;
+}
+
+#sidebar #submit-btn-container {
+	margin-bottom: 5px;
+}
+
+#img-canvas {
+	width: 100%;
+	after setting width to 100% i need to get the actual width
+	so that i can do a conversion of coordinates.
+	*/
+}

@@ -1,0 +1,62 @@
+<div id="index">
+	{{#unless readonly}}
+	<div id="sidebar">
+		<form id="guess-form" legend="derp">
+			<div id="guess-text-content">
+				<h3>Shape</h3>
+				<div>Computer: <span id="shape-comp-guess">No Value</span></div>
+				<div><label for="shape-input">User Input: </label><input type="text" id="shape-input" name="shape-input" class="guess-input"/></div>
+				<h3>Shape Color</h3>
+				<div>Computer: <span id="shape-color-comp-guess">No Value</span></div>
+				<label for="shape-color-input">User Input: </label><input type="text" id="shape-color-input" name="shape-color-input" class="guess-input"/>
+				<h3>Letter</h3>
+				<div>Computer: <span id="letter-comp-guess">No Value</span></div>
+				<label for="letter-input">User Input: </label><input type="text" id="letter-input" name="letter-input" class="guess-input"/>
+				<h3>Color</h3>
+				<div>Computer: <span id="letter-color-comp-guess">No Value</span></div>
+				<label for="letter-color-input">User Input: </label><input type="text" id="letter-color-input" name="letter-color-input" class="guess-input"/>
+			</div>
+			<div id="btn-content">
+				<div id="submit-btn-container">
+					<input type="button" id="discard-btn" value="Discard" />
+					<input type="button" id="submit-btn" value="Submit" />
+				</div>
+				<div id="nav-btn-container">
+					<input type="button" id="prev-btn" value="<----" />
+					<input type="button" id="next-btn" value="---->" />
+				</div>
+			</div>
+		</form>
+	</div>
+	{{/unless}}
+	{{#if readonly}}
+	<div id="left-col-ro">
+		<canvas id="img-canvas" height="486px" width="720px"></canvas>
+	</div>
+	{{else}}
+	<div id="left-col">
+		<canvas id="img-canvas" height="486px" width="720px"></canvas>
+	</div>
+	{{/if}}
+</div>
+
+<!--Good solution to creating a readonly version:
+<script src="shared version.js"></script>
+{{#if ro}}
+	<script src="regu version...">
+{{else}}
+	<script src="read only version...">
+{{/if}}-->
+
+
+<script type="text/javascript">
+	/*Bad solution
+	ReadOnly = {{ ro }}*/
+
+	YUI().use('clientapp-images', 'clientapp-imageview', 'panel', 'io-form', 'node', function (Y) {
+		Y.on('domready', function() {
+			var images = new Y.ClientApp.Images();
+		});
+		
+	});
+</script>
