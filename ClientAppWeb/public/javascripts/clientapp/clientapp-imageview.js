@@ -98,7 +98,9 @@ YUI.add('clientapp-imageview', function(Y){
 			//on my computer:
 			//currentImage.src = 'http://'+img.imageIP+':3000/flightdata/'+imageData.image_name;
 			//ground station:
-			currentImage.src = 'http://'+img.imageIP+':8888/targets/'+imageData.image_name;
+            var imageChunks = imageData.image_name.split("\\")
+            var imageName = imageChunks[imageChunks.length-1]
+			currentImage.src = 'http://192.168.1.90:8888/targets/'+imageName;
         }
 
         //Handlers
@@ -151,20 +153,6 @@ YUI.add('clientapp-imageview', function(Y){
         	*/
 
         }
-        /*When you release a click draw center if left click and top if right click*/
-        /*
-        this.handleMouseUp = function(e) {
-       		console.log('mouseup');
-        	var coords = canvas.relMouseCoords(e);
-			var x = coords.x;
-			var y = coords.y;
-
-			if(e.button === 1) {
-				self.drawCenterCircle(x,y,CIRCLE_DIAM);
-			} else if(e.button === 3) {
-				self.drawDirectionCircle(x,y,CIRCLE_DIAM);
-			}
-        }*/
         this.handleSetCurrentImg = function(e) {
         	currentImage.onload = function() {
 				self.drawImg(currentImage);
@@ -172,7 +160,9 @@ YUI.add('clientapp-imageview', function(Y){
 			//on my computer:
 			//currentImage.src = 'http://'+img.imageIP+':3000/flightdata/'+e.src;
 			//ground station:
-			currentImage.src = 'http://'+img.imageIP+':8888/targets/'+e.src;
+            var imageChunks = e.src.split("\\")
+            var name = imageChunks[imageChunks.length-1]
+			currentImage.src = 'http://192.168.1.90:8888/targets/'+name;
         }
        
         canvas.addEventListener('touchstart', self.handleMouseDown);
