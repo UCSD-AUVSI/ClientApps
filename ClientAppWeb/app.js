@@ -67,6 +67,7 @@ app.get('/rest/flightdata', function(request,response) {
   db.connect(function(err){
     db.query("select candidateid,targetid,description.description_id,shape,shapecolor,letter,lettercolor,target_x,target_y,top_x,top_y,timestamp,image_name from description inner join (select targetid,candidates.candidateid,description_id,image_name from unverified_targets inner join candidates on candidates.candidateid = unverified_targets.candidateid) as c on c.description_id = description.description_id", function(errors,resultset) {
       response.json([resultset.rows,"192.168.1.128"])
+      db.end();
     });
   });
 });
@@ -74,50 +75,80 @@ app.put('/rest/votes', function(request,response) {
   console.log('put /rest/votes');
   var targetid = request.param('targetid');
   var hasEntry = false;
-  var db = new pg.connect(pgstring);
-  db.query("select * from verified_targets where targetid=?",targetid, function(errors,resultset) {
-
-      if(resultset.length !== 0) {
-        hasEntry = true;
-      }
-      if(hasEntry) {
-        console.log('update');
-        db.query("UPDATE description d SET shape=?,shapecolor=?,letter=?,lettercolor=?,target_x=?,target_y=?,top_x=?,top_y=? WHERE d.description_id= (select description_id from unverified_targets where targetid = ?)",request.param('shape'),request.param('shapecolor'),request.param('letter'),
-            request.param('lettercolor'),request.param('target_x'),request.param('target_y'),request.param('top_x'),request.param('top_y'),targetid,function(errors,updateresultset) {
-            //select * from description where description.description_id = (select description_id from unverified_targets where targetid = 2);
-            console.log(errors);
-            response.send('success');
-        });
-      } else {
-
-        console.log('update insert insert');
-
-
-        //THIS ISNT INSERTING CORRECTLY FOR SOME REASON! NOTHING SHOWS UP IN DESCRIPTION, BUT THERE IS NO ERROR. THE ID VALUES SEEM CORRECT
-
-        db.query("UPDATE description d SET shape=?,shapecolor=?,letter=?,lettercolor=?,target_x=?,target_y=?,top_x=?,top_y=? WHERE d.description_id= ?",request.param('shape'),request.param('shapecolor'),request.param('letter'),
-            request.param('lettercolor'),request.param('target_x'),request.param('target_y'),request.param('top_x'),request.param('top_y'),request.param('description_id'),function(errors,insertresultset) {
-              console.log(insertresultset)
-            //console.log(insertresultset[0]['description_id']);
-          db.query("INSERT INTO gps_position (lat, lon, alt) VALUES (-1000, -1000, -1000) RETURNING gps_id",function(errors,gps_pos_insertresultset) {
-
-
-                db.query("INSERT INTO verified_targets (targetid,center_gps_id) VALUES (?,?)",targetid,gps_pos_insertresultset[0]['gps_id'],function(errors,innerinsertresultset) { // CENTER_GPS_ID WILL CAUSE FAILURE
-                  console.log(innerinsertresultset);
-                  response.send('success');
-                });
-          });
-        });
-
-
-
-      }
-    
+  var db = new pg.Client(pgstring);
+  db.connect(function(err){
+    db.query("select * from verified_targets where targetid=$1",
+      [targetid], function(errors,resultset) {
+        if(resultset.length) {
+          db.query("UPDATE description d " +
+            "SET shape=$1, " +
+                "shapecolor=$2, " +
+                "letter=$3, " + 
+                "lettercolor=$4, " +
+                "target_x=$5, " +
+                "target_y=$6, " +
+                "top_x=$7, " +
+                "top_y=$8  " +
+            "WHERE d.description_id= " +
+            "(SELECT description_id " +
+            "FROM unverified_targets " +
+            "WHERE targetid = $9)",
+           [request.param('shape'),
+            request.param('shapecolor'),
+            request.param('letter'),
+            request.param('lettercolor'),
+            request.param('target_x'),
+            request.param('target_y'),
+            request.param('top_x'),
+            request.param('top_y'),
+            targetid],
+            function(errors,updateresultset) {
+              console.log(errors);
+              response.send('success');
+              db.end();
+            });
+        } else {
+          db.query("UPDATE description d " +
+              "SET shape=$1, " +
+                  "shapecolor=$2, " +
+                  "letter=$3, " +
+                  "lettercolor=$4, " +
+                  "target_x=$5, " + 
+                  "target_y=$6, " +
+                  "top_x=$7, " +
+                  "top_y=$8 " +
+              "WHERE d.description_id= $9", 
+             [request.param('shape'),
+              request.param('shapecolor'),
+              request.param('letter'),
+              request.param('lettercolor'),
+              request.param('target_x'),
+              request.param('target_y'),
+              request.param('top_x'),
+              request.param('top_y'),
+              request.param('description_id')],
+              function(errors,insertresultset) {
+                db.query(
+                  "INSERT INTO gps_position (lat, lon, alt)" +
+                  "VALUES (-1000, -1000, -1000) " +
+                  "RETURNING gps_id",
+                  function(errors,gps_pos_insertresultset) {
+                    console.log(gps_pos_insertresultset)
+                    db.query("INSERT INTO verified_targets (targetid,center_gps_id) " +
+                      "VALUES ($1,$2)",
+                     [targetid,
+                      gps_pos_insertresultset.rows[0]['gps_id']],
+                      function(errors,innerinsertresultset) { 
+                        console.log(innerinsertresultset);
+                        response.send('success');
+                        db.end();
+                      });
+                  });
+              });
+        }
+      }); 
   });
 
-
-  
-  
 });
 
 app.put('/rest/testinsert', function(request,response) {
