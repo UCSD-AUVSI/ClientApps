@@ -3,6 +3,8 @@
  * Module dependencies.
  */
 
+var HOST_IP = "192.168.1.29";
+
 var express = require('express')
   , routes = require('./routes')
   , os = require('os');
@@ -13,7 +15,7 @@ var fs = require('fs');
 var http = require('http');
 var io = require('socket.io').listen(app);
 //Ground Station connection string
-var pgstring = "pgsql://postgres:triton@192.168.1.90:5432/AUVSI_flightdata"
+var pgstring = "pgsql://postgres:triton@127.0.0.1:5432/AUVSI_flightdata"
 
 io.DEBUG = 0;//Hide all those debug statements in the console
 
@@ -66,7 +68,7 @@ app.get('/rest/flightdata', function(request,response) {
   var db = new pg.Client(pgstring);
   db.connect(function(err){
     db.query("select candidateid,targetid,description.description_id,shape,shapecolor,letter,lettercolor,target_x,target_y,top_x,top_y,timestamp,image_name from description inner join (select targetid,candidates.candidateid,description_id,image_name from unverified_targets inner join candidates on candidates.candidateid = unverified_targets.candidateid) as c on c.description_id = description.description_id", function(errors,resultset) {
-      response.json([resultset.rows,"192.168.1.128"])
+      response.json([resultset.rows, HOST_IP])
       db.end();
     });
   });
@@ -128,22 +130,9 @@ app.put('/rest/votes', function(request,response) {
               request.param('top_y'),
               request.param('description_id')],
               function(errors,insertresultset) {
-                db.query(
-                  "INSERT INTO gps_position (lat, lon, alt)" +
-                  "VALUES (-1000, -1000, -1000) " +
-                  "RETURNING gps_id",
-                  function(errors,gps_pos_insertresultset) {
-                    console.log(gps_pos_insertresultset)
-                    db.query("INSERT INTO verified_targets (targetid,center_gps_id) " +
-                      "VALUES ($1,$2)",
-                     [targetid,
-                      gps_pos_insertresultset.rows[0]['gps_id']],
-                      function(errors,innerinsertresultset) { 
-                        console.log(innerinsertresultset);
-                        response.send('success');
-                        db.end();
-                      });
-                  });
+                console.log(insertresultset);
+                response.send('success');
+                db.end();
               });
         }
       }); 

@@ -100,7 +100,7 @@ YUI.add('clientapp-imageview', function(Y){
 			//ground station:
             var imageChunks = imageData.image_name.split("\\")
             var imageName = imageChunks[imageChunks.length-1]
-			currentImage.src = 'http://192.168.1.90:8888/targets/'+imageName;
+			currentImage.src = 'http://192.168.1.29:8888/targets/'+imageName;
         }
 
         //Handlers
